@@ -1,0 +1,86 @@
+INTRODUCTION
+
+In this world of big data. I love the idea of smart cities. The thought of automating smart energy systems, electrical grids, one-touch access ports, scanning process – So fascinating! No? Honestly, it’s a dream of a data scientist and I’m delighted that a lot of cities around the world are coming on the way to becoming keener and smarter. One of the main mechanisms of a smart city is automating running traffic. This got me thinking – could I use data science and build a vehicle count detection model that could play a part in smart traffic management?
+
+One can easily track the number of vehicles, if you could integrate a vehicle detection system in a traffic light camera.
+
+We can easily detect objects and recognize objects in a flash. However, how a machine learn this technique of recognizing objects?
+
+Using computer vision, object detection can be . Here, we'll build and automatic vehicle count detection model.
+
+Object detection is fascinating and if performed by computer vision. Boom! It Goes to a new level. It goes to a whole new level when we’re dealing with video data. The complexity rises a notch, but so do the rewards!
+
+Number of sub tasks can be performed for detecting moving as well as stationary objects such as counting number of vehicles, finding relative sizes of the objects or distance between different objects
+
+OBJECTIVE
+Here our objective lies within the object detection algorithm. To capture the moving objects highlighted int the video/frames.Within the model the main aim is to detect the moving object as well as count the number of moving objects in the frames. Since the existing method of image processing has difficulties in the installation, cost with low precision. An innovative counting method is projected which understands counting, detecting and tracking multivehicle
+
+WHY OPENCV?
+We have used computer vision library "OpenCV" for an object detection/Image processing. OpenCV is an open source and free. It is easy to use and install. With this, OpenCV uses several useful functions such as cv2.findContours(), cv2.drawContours() for tracking and detecting moving objects and retrieves contours from the binary image.
+
+COMPETITORS OF OPENCV
+There alternatives and competitors to OpenCv. For instance: including Microsoft Computer Vision API, Amazon Rekognition, Google Cloud Vision API, and scikit-image.
+
+OPENCV GAINING PROMINENCE
+The key reason for building a model via OpenCV:
+
+The affordability of processing power
+Open-source
+Availability of cheaper cameras
+Building Model
+Download package and Importing Library
+Download the package in your system and Import below Computer vision library ie. OpenCV using command:
+
+import cv2
+Read Video/frames
+Keep the frames in a folder named “frames” inside your working directory. From that folder, we will import the frames.
+
+cap = cv2.VideoCapture("teslacrash.gif")
+Initialize the frames in the video stream
+Declare and read frames 2 frames from the cap instance.
+
+success,img1=cap.read()
+success,img2=cap.read()
+Loop over the frames of the video
+Calculate the absolute difference between the first and second frame. Convert the frame into gray scale. Blur the gray scale frame,using Gaussian blur function.
+
+while True:
+    diff= cv2.absdiff(img1,img2)
+    gray= cv2.cvtColor(diff,cv2.COLOR_BGR2GRAY)
+    blur=cv2.GaussianBlur(gray,(5,5),0)
+Once this is completed, we find out the threshold of the gray scale frames. Since we do not require first variable while declaring threshold, we kept it as blank.
+
+_, thresh=cv2.threshold(blur,20,255,cv2.THRESH_BINARY)
+To find out better contour lines, we have dilated the threshold image for better contouring with number of iteration=3.You can alter the iterations as per your need.
+
+dilated= cv2.dilate(thresh,None,iterations=3)
+Method to find Contours:
+
+Contours
+Hierarchy
+We have only used contours here. The contour function applied on the dilated frame. Since, there are multiple ways of choosing modes in OpenCV. We have used cv2.RETR_TREE and the method used is cv2.CHAIN_APPRX_SIMPLE.
+
+contours ,_ = cv2.findContours ( dilated , cv2.RETR_TREE , cv2.CHAIN_APPROX_SIMPLE )
+number = str ( len ( contours ) )
+Loop over the contours
+The contours are unevenly distributed within the moving objects. Therefore, now is the time to create the rectangular boxes for detection contour function which saves all the coordinates of the found contours. Since, just by drawing boxes over detected moving objects might create anomalies/outliers. Therefore, to remove noises from detection we have calculated an area using contour Area function stating, if the area of the object is less than 700 then do not draw the rectangle else, create a rectangle.
+
+for contour in contours:
+    (x,y,w,h)= cv2.boundingRect(contour)
+If the contour is too small, ignore it
+    if cv2.contourArea(contour)<500:
+        continue
+Compute the bounding box for the contour, draw it on the frame,and update the text
+    cv2.rectangle(img1,(x,y),(x+w,y+h),(0,255,0),2)
+    cv2.putText(img1, "No. of Contour = " + number,(10,25),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),2)
+We have also added text to frame giving the results as the “No. of cars/frames detected”
+
+Show the frame and record if the user presses a key
+We have assigned values inside frame 2 into frame1 and read the second frame just like we did for the frame1. This is how we are reading 2 frames and finding out the difference between them.
+
+cv2.imshow("Video",img1)
+img1=img2
+ret,img2 = cap.read()
+if the q key is pressed, break from the lop
+if cv2.waitKey (1) & 0xFF == ord('q'):
+    break
