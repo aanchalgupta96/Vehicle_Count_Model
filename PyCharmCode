@@ -1,0 +1,30 @@
+import cv2
+
+cap = cv2.VideoCapture( 'Night Time Traffic Camera video.mp4' )
+success,img1=cap.read()
+success,img2=cap.read()
+
+while True:
+    diff= cv2.absdiff(img1,img2)
+    gray= cv2.cvtColor(diff,cv2.COLOR_BGR2GRAY)
+    blur=cv2.GaussianBlur(gray,(5,5),0)
+    _, thresh=cv2.threshold(blur,20,255,cv2.THRESH_BINARY)
+    dilated= cv2.dilate(thresh,None,iterations=3)
+    contours ,_ = cv2.findContours ( dilated , cv2.RETR_TREE , cv2.CHAIN_APPROX_SIMPLE )
+    number = str ( len ( contours ) )
+
+    for contour in contours:
+            (x,y,w,h)= cv2.boundingRect(contour)
+
+            if cv2.contourArea(contour)<5000:
+                    continue
+            cv2.rectangle(img1,(x,y),(x+w,y+h),(0,0,255),2)
+            cv2.putText(img1, "No. of Contour = " + number,(10,20),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+
+
+    cv2.imshow("Video",img1)
+    img1=img2
+    ret,img2 = cap.read()
+
+    if cv2.waitKey (100) & 0xFF == ord('q'):
+        break
